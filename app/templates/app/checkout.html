@@ -1,0 +1,73 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}Checkout{% endblock title %}
+{% block main-content %}
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-sm-6">
+            <h4>Order Summary</h4>
+            <hr>
+            {% for item in cart_items %}
+            <div class="card mb-2">
+                <div class="card-body">
+                  <img src="{{ product.product_image.url }}">
+                    <h5>Product: {{ item.product.title }}</h5>
+                    <p>Quantity: {{ item.quantity }}</p> <!-- Assuming you have a quantity field in Cart -->
+                    <p class="fw-bold">Price: Rs. {{ item.product.discounted_price }}</p>
+                </div>
+            </div>
+            {% endfor %}
+            <p class="fw-bold">Total Cost + Rs. 70 = Rs. {{ total_amount }}</p>
+            <small>Terms and Conditions: Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia, ullam saepe! Iure optio repellat dolor velit, minus rem. Facilis cumque neque numquam laboriosam, accusantium adipisci nisi nihil in et quis?</small>
+        </div>
+        <div class="col-sm-4 offset-sm-1">
+            <h4>Select Shipping Address</h4>
+            <hr>
+            <form action="{% url 'checkout' %}" method="post">  <!-- Adjust this URL to your confirm order view -->
+                {% csrf_token %}
+                {% for ad  in Address %}  <!-- Use 'addresses' passed from the view -->
+                <div class="card mt-2">
+                    <div class="card-body">
+                        <h5>{{ ad.name }}</h5>
+                        <p>{{ ad.addresses }}</p>
+                        <p>{{ ad.city }}, {{ ad.state }}, {{ ad.zipcode }}</p>
+                    </div>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="selected_addresses" id="addresses_{{ forloop.counter }}" value="{{ ad.id }}" required>
+                    <label class="form-check-label fw-bold" for="addresses_{{ forloop.counter }}">
+                        Address: {{ forloop.counter }}
+                    </label>
+                </div>
+                {% endfor %}
+                <div class="text-end">
+                    <div id="paypal-button-container"></div>
+                    
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main-content %}
+
+{% block payment-getway %} 
+<script src="https://www.paypal.com/sdk/js?client-id=AZrh7TyBxbhwORM3JCJPWn6Fr-FrQlBPAX_KE_-VYxURh1tIlsAIjhxjScHYqOQnnM0BMBALXBhytGy5&currency=USD"></script>
+<script>
+  paypal.Buttons({
+    createOrder: function(data, actions) {
+      return actions.order.create({
+        purchase_units: [{
+          amount: {
+            value: '{{ total_amount }}'  // Correct variable reference
+          }
+        }]
+      });
+    },
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function(details) {
+        alert('Transaction complete by ' + details.payer.name.given_name + '!');
+      });
+    }
+  }).render('#paypal-button-container');
+</script>
+{% endblock payment-getway %}

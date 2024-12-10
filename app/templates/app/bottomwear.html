@@ -1,0 +1,60 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}Bottom Wear{% endblock title %}
+{% block main-content %}
+<div class="container my-5"
+>
+    <div class="row">
+        <div class="col-sm-8 offset-sm-1">
+            <form method="GET" action="{% url 'bottomwear' %}" class="mb-4">
+                <!-- Brand Filter -->
+                <select name="brand" class="form-select">
+                    <option value="">All Brands</option>
+                    {% for brand in brands %}
+                    <option value="{{ brand }}" {% if request.GET.brand == brand %}selected{% endif %}>{{ brand }}</option>
+                    {% endfor %}
+                </select>
+
+                <!-- Price Filter -->
+                <select name="price" class="form-select my-2">
+                    <option value="">All Prices</option>
+                    <option value="0-800" {% if request.GET.price == '0-800' %}selected{% endif %}>Below 800</option>
+                    <option value="700 - 1000" {% if request.GET.price == '700 - 1000' %}selected{% endif %}>700 - 1000</option>
+                    <option value="600 - 1000" {% if request.GET.price == '600 - 1000' %}selected{% endif %}>600 - 1000</option>
+                    <option value="500+" {% if request.GET.price == '500+' %}selected{% endif %}>Above 500</option>
+                </select>
+
+                <!-- Sort By -->
+                <select name="sort" class="form-select my-2">
+                    <option value="">Sort By</option>
+                    <option value="alphabetical" {% if request.GET.sort == 'alphabetical' %}selected{% endif %}>Alphabetical</option>
+                    <option value="price_low_to_high" {% if request.GET.sort == 'price_low_to_high' %}selected{% endif %}>A TO Z</option>
+                    <option value="price_high_to_low" {% if request.GET.sort == 'price_high_to_low' %}selected{% endif %}>Z TO A</option>
+                </select>
+
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+            </form>
+
+            <div class="row">
+                {% for product in bottomwear %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="{{ product.product_image.url }}" class="card-img-top" alt="{{ product.title }}" height="300px" width="300px">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.title }}</h5>
+                            <p class="card-text">Price: Rs. {{ product.discounted_price }}</p>
+                            <p class="card-text">Original Price: Rs. {{ product.selling_price }}</p>
+                            <a href="{% url 'product-detail' product.pk %}" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <p>No related products found.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
